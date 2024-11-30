@@ -1,17 +1,20 @@
-# Use a slim version of Python 3.9 as base image
+# Use a Python slim image as the base image
 FROM python:3.9-slim
 
-# Set the working directory inside the container
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the local files into the container
+# Copy the current directory contents into the container at /app
 COPY . /app
 
-# Install Flask and Selenium
-RUN pip install flask selenium
+# Install Flask (required for your application)
+RUN pip install flask
 
-# Expose port 5000 (this is the port Flask runs on by default)
+# Install Selenium for the tests
+RUN pip install selenium
+
+# Expose port 5000 for the Flask application
 EXPOSE 5000
 
-# Command to run the Flask application when the container starts
+# Command to run the application
 CMD ["python", "index.py"]
