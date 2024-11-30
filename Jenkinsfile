@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'selenium-jenkins-webapp'
         DOCKER_TAG = 'latest'
-        PUBLIC_IP = '44.244.209.87'  // Your server's public IP
+        PUBLIC_IP = '44.243.227.79'  // Your server's public IP
         PORT = '8081'  // Port on which app will run
     }
 
