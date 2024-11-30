@@ -1,10 +1,19 @@
 pipeline {
     agent any
-
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/SidraSaleem296/selenium-jenkins.git'
+                script {
+                    try {
+                        checkout([$class: 'GitSCM', branches: [[name: '*/main']],
+                            userRemoteConfigs: [[url: 'https://github.com/SidraSaleem296/selenium-jenkins.git']]
+                        ])
+                    } catch (Exception e) {
+                        echo "Error during Git checkout: ${e}"
+                        currentBuild.result = 'FAILURE'
+                        error "Stopping pipeline due to checkout failure."
+                    }
+                }
             }
         }
         stage('Build Docker Image') {
