@@ -12,25 +12,18 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
-                sh 'docker build -t sample-web-app-1 .'
+                sh 'docker build -t sample-web-app-4 .'
             }
         }
 
         stage('Run Docker Container') {
             steps {
                 echo 'Running Docker container...'
-                sh 'docker run -d -p 5001:5000 --name sample-web-app-container-1 sample-web-app-1'
+                sh 'docker run -d -p 5001:5000 --name sample-web-app-container-4 sample-web-app-4'
                 script {
                     // Allow some time for the container to start
                     sleep 10
                 }
-            }
-        }
-
-        stage('List Files') {
-            steps {
-                echo 'Listing files in the workspace...'
-                sh 'ls -la'
             }
         }
 
@@ -55,8 +48,8 @@ pipeline {
         stage('Cleanup') {
             steps {
                 echo 'Cleaning up Docker container...'
-                sh 'docker stop sample-web-app-container-1'
-                sh 'docker rm sample-web-app-container-1'
+                sh 'docker stop sample-web-app-container-4'
+                sh 'docker rm sample-web-app-container-4'
             }
         }
     }
