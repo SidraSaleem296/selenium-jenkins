@@ -1,38 +1,41 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 import time
 
 # Set up Chrome options
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")  # Run in headless mode (without UI)
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Run Chrome in headless mode (no UI)
+chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
 
-# Set up the WebDriver (Make sure you have chromedriver installed)
-driver = webdriver.Chrome(options=options)
+# Path to the Chrome driver
+service = Service("/usr/bin/chromium-driver")
 
-def test_page_title():
-    print("Testing page title...")
-    driver.get("http://44.244.209.87:5001")  # Update with your public IP and port
-    
-    # Test: Verify that the page title is correct
-    assert driver.title == "Sample Web App", f"Expected title 'Sample Web App', but got {driver.title}"
+# Set up the driver
+driver = webdriver.Chrome(service=service, options=chrome_options)
 
-def test_button_click():
-    print("Testing button click...")
-    button = driver.find_element(By.ID, "submitBtn")  # Change the ID based on your HTML
+# URL of the web app (Make sure it points to your Docker container's IP and port)
+url = "http://44.244.209.87:8081"
+
+try:
+    # Open the webpage
+    driver.get(url)
+
+    # Check if the title contains the expected text
+    assert "Sample Web App" in driver.title
+
+    # Check if the button is present
+    button = driver.find_element(By.ID, "submitBtn")
+    assert button.is_displayed()
+
+    # Click the button and wait for interaction (optional check)
     button.click()
+    time.sleep(2)  # Wait for the action to complete
+
+    print("Test passed!")
     
-    # Add a short wait to ensure the page reacts
-    time.sleep(2)
-
-    # Check if the button is still displayed (or other logic after clicking)
-    assert button.is_displayed(), "Button not displayed after click."
-
-if __name__ == "__main__":
-    test_page_title()
-    test_button_click()
-    print("All tests passed!")
-
-    driver.quit()
+except Exception as e:
+    print(f"Test failed: {str(e)}")
+finally:
+    driver.quit()  # Close the browser window
