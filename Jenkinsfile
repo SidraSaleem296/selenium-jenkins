@@ -5,7 +5,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Cloning repository...'
-                git 'https://github.com/SidraSaleem296/selenium-jenkins.git'
+                // Ensure you're checking out the correct branch 'main'
+                git branch: 'main', url: 'https://github.com/SidraSaleem296/selenium-jenkins.git'
             }
         }
 
