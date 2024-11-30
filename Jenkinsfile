@@ -19,6 +19,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Build the Docker image from the Dockerfile
                     sh 'docker build -t simple-web-app .'
                 }
             }
@@ -26,14 +27,24 @@ pipeline {
         stage('Run Application') {
             steps {
                 script {
-                    sh 'docker run -d -p 5000:5000 simple-web-app'
+                    // Run the container in detached mode, mapping port 5000
+                    sh 'docker run -d -p 5000:5000 --name simple-web-app-container simple-web-app'
                 }
             }
         }
         stage('Test Application') {
             steps {
                 script {
-                    sh 'python3 -m unittest test_app.py'
+                    // Run tests inside the running container
+                    sh 'docker exec simple-web-app-container python3 -m unittest test_app.py'
+                }
+            }
+        }
+        stage('Clean Up') {
+            steps {
+                script {
+                    // Remove the container after the tests have finished
+                    sh 'docker rm -f simple-web-app-container'
                 }
             }
         }
