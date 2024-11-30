@@ -1,66 +1,62 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = 'selenium-jenkins-webapp'
+        DOCKER_TAG = 'latest'
+        PUBLIC_IP = '44.244.209.87'  // Your server's public IP
+        PORT = '8081'  // Port on which app will run
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                echo 'Cloning repository...'
-                // Ensure you're checking out the correct branch 'main'
-                git branch: 'main', url: 'https://github.com/SidraSaleem296/selenium-jenkins.git'
+                git 'https://github.com/SidraSaleem296/selenium-jenkins/'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image...'
-                sh 'docker build -t sample-web-app-4 .'
-            }
-        }
-
-        stage('Run Docker Container') {
-            steps {
-                echo 'Running Docker container...'
-                sh 'docker run -d -p 5001:5000 --name sample-web-app-container-4 sample-web-app-4'
                 script {
-                    // Allow some time for the container to start
-                    sleep 10
+                    // Build the Docker image for your application and tests
+                    docker.build("$DOCKER_IMAGE:$DOCKER_TAG")
                 }
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Run Web Application in Docker') {
             steps {
-                echo 'Installing Python dependencies...'
-                sh '''
-                    pip3 install selenium
-                    # Install ChromeDriver and related dependencies
-                    apt-get update && apt-get install -y chromium-driver
-                '''
+                script {
+                    // Run the web app in the background on port 8081
+                    docker.run("$DOCKER_IMAGE:$DOCKER_TAG", "-d -p $PORT:$PORT")
+                }
             }
         }
 
         stage('Run Selenium Tests') {
             steps {
-                echo 'Running Selenium tests...'
-                sh 'python3 test_app.py'  // Ensure the test script is at the root level
+                script {
+                    // Run Selenium tests inside the Docker container
+                    docker.image("$DOCKER_IMAGE:$DOCKER_TAG").inside {
+                        sh 'pytest test_app.py'  // Run the test cases
+                    }
+                }
             }
         }
 
-        stage('Cleanup') {
+        stage('Clean Up') {
             steps {
-                echo 'Cleaning up Docker container...'
-                sh 'docker stop sample-web-app-container-4'
-                sh 'docker rm sample-web-app-container-4'
+                script {
+                    // Clean up any containers after tests are finished
+                    sh 'docker ps -q | xargs docker stop | xargs docker rm'
+                }
             }
         }
     }
 
     post {
         always {
-            echo 'Pipeline finished.'
-        }
-        failure {
-            echo 'Pipeline failed. Please check the logs.'
+            cleanWs()  // Clean up workspace after each pipeline run
         }
     }
 }
