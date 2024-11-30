@@ -1,30 +1,17 @@
-# Use the official Python image as the base image for your app
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
-# Install necessary dependencies (Chrome, chromedriver, and Selenium)
-RUN apt-get update && apt-get install -y \
-    wget \
-    curl \
-    unzip \
-    google-chrome-stable \
-    chromium-driver \
-    && apt-get clean
-
-# Install Selenium Python bindings
-RUN pip install selenium
-
-# Set Chrome and ChromeDriver environment variables
-ENV CHROME_BIN="/usr/bin/google-chrome-stable"
-ENV CHROME_DRIVER="/usr/bin/chromium-driver"
-
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy application files into the Docker image
-COPY . .
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Expose port 8081
-EXPOSE 8081
+# Install Python dependencies
+RUN pip install flask
 
-# Run your web application (e.g., using Flask or any other web server)
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
+
+# Run app.py when the container launches
 CMD ["python", "index.py"]
