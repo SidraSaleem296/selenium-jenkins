@@ -1,23 +1,20 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_IMAGE = "flask-app"
+        IMAGE_NAME = "flask-app"
     }
-
     stages {
         stage('Checkout SCM') {
             steps {
-                // Checkout the code from the Git repository
                 checkout scm
             }
         }
-
+        
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image with the Flask app
-                    sh 'docker build -t ${DOCKER_IMAGE} .'
+                    // Build the Docker image
+                    sh 'docker build -t ${IMAGE_NAME} .'
                 }
             }
         }
@@ -26,7 +23,9 @@ pipeline {
             steps {
                 script {
                     // Run the Docker container in detached mode
-                    sh 'docker run -d -p 5000:5000 ${DOCKER_IMAGE}'
+                    def containerId = sh(script: "docker run -d -p 5000:5000 ${IMAGE_NAME}", returnStdout: true).trim()
+                    // Store the container ID for later use
+                    env.CONTAINER_ID = containerId
                 }
             }
         }
@@ -34,22 +33,30 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Run tests within the container, using the virtual environment
-                    // Install pytest in the container's virtual environment (if not installed)
-                    sh 'docker exec ${DOCKER_IMAGE} /app/venv/bin/pip install pytest'
+                    // Wait for the container to be fully ready (you can customize this sleep time as needed)
+                    sleep 10
+                    
+                    // Run tests inside the running container
+                    sh "docker exec ${env.CONTAINER_ID} /app/venv/bin/pip install pytest"
+                    sh "docker exec ${env.CONTAINER_ID} /app/venv/bin/pytest"
+                }
+            }
+        }
 
-                    // Run tests using pytest inside the container's virtual environment
-                    sh 'docker exec ${DOCKER_IMAGE} /app/venv/bin/python -m pytest'
+        stage('Post Actions') {
+            steps {
+                script {
+                    // Stop and remove the container after the tests
+                    sh "docker stop ${env.CONTAINER_ID} || true"
+                    sh "docker rm ${env.CONTAINER_ID} || true"
                 }
             }
         }
     }
-
     post {
         always {
-            // Clean up and stop the container after the pipeline
-            sh 'docker stop ${DOCKER_IMAGE} || true'
-            sh 'docker rm ${DOCKER_IMAGE} || true'
+            // Cleanup, ensure Docker system is not cluttered
+            sh 'docker system prune -f'
         }
     }
 }
