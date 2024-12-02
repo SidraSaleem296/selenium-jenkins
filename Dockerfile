@@ -1,24 +1,24 @@
-# Use a Python base image
+# Use Python 3.9 slim as the base image
 FROM python:3.9-slim
 
-# Set the working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the application files into the container
+# Copy the current directory contents into the container at /app
 COPY . /app
 
-# Install pipenv or virtualenv (optional, but recommended)
+# Upgrade pip and install virtualenv
 RUN pip install --upgrade pip && \
     pip install virtualenv
 
-# Create a virtual environment
+# Create a virtual environment in /app/venv
 RUN virtualenv venv
 
-# Activate the virtual environment and install dependencies
+# Install the Python dependencies in the virtual environment
 RUN /app/venv/bin/pip install -r requirements.txt
 
 # Expose the application port
 EXPOSE 5000
 
-# Command to run the application
+# Set the entry point to use the virtual environment's Python interpreter
 CMD ["/app/venv/bin/python", "index.py"]
