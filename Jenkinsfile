@@ -20,5 +20,12 @@ pipeline {
                 }
             }
         }
+        stage('Run Tests') {
+            steps {
+                script {
+                    sh 'pytest test_app.py'
+                }
+            }
+        }
     }
 }
