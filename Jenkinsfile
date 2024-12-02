@@ -23,6 +23,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
+                    // Ensure pytest is installed in the Jenkins environment
+                    sh 'pip install pytest'
                     sh 'pytest test_app.py'
                 }
             }
