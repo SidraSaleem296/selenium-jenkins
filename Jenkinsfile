@@ -1,9 +1,9 @@
 pipeline {
     agent any
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/SidraSaleem296/selenium-jenkins.git'
+                git branch: 'main', url: 'https://github.com/SidraSaleem296/selenium-jenkins.git'
             }
         }
         stage('Build Docker Image') {
