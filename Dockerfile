@@ -1,24 +1,20 @@
-# Use Python 3.9 slim as the base image
+# Use the official Python base image
 FROM python:3.9-slim
 
-# Set the working directory in the container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy the requirements.txt file into the container
+COPY requirements.txt .
 
-# Upgrade pip and install virtualenv
-RUN pip install --upgrade pip && \
-    pip install virtualenv
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Create a virtual environment in /app/venv
-RUN virtualenv venv
+# Copy the rest of the application files into the container
+COPY . .
 
-# Install the Python dependencies in the virtual environment
-RUN /app/venv/bin/pip install -r requirements.txt
-
-# Expose the application port
+# Expose the port on which the Flask app will run
 EXPOSE 5000
 
-# Set the entry point to use the virtual environment's Python interpreter
-CMD ["/app/venv/bin/python", "index.py"]
+# Command to run the Flask application
+CMD ["python", "index.py"]
